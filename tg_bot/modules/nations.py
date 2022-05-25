@@ -46,8 +46,7 @@ def addsudo(update: Update, context: CallbackContext) -> str:
     user_member = bot.getChat(user_id)
     rt = ""
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -85,7 +84,7 @@ def addsudo(update: Update, context: CallbackContext) -> str:
     )
 
     if chat.type != "private":
-        log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+        log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
     return log_message
 
@@ -105,8 +104,7 @@ def addsupport(
     user_member = bot.getChat(user_id)
     rt = ""
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -130,8 +128,9 @@ def addsupport(
     SUPPORT_USERS.append(user_id)
 
     update.effective_message.reply_text(
-        rt + f"\n{user_member.first_name} was added as a Support user!"
+        f"{rt}\n{user_member.first_name} was added as a Support user!"
     )
+
 
     log_message = (
         f"#SUPPORT\n"
@@ -140,7 +139,7 @@ def addsupport(
     )
 
     if chat.type != "private":
-        log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+        log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
     return log_message
 
@@ -157,8 +156,7 @@ def addwhitelist(update: Update, context: CallbackContext) -> str:
     user_member = bot.getChat(user_id)
     rt = ""
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -182,8 +180,9 @@ def addwhitelist(update: Update, context: CallbackContext) -> str:
     WHITELIST_USERS.append(user_id)
 
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Whitelist user!"
+        f"{rt}\nSuccessfully promoted {user_member.first_name} to a Whitelist user!"
     )
+
 
     log_message = (
         f"#WHITELIST\n"
@@ -192,7 +191,7 @@ def addwhitelist(update: Update, context: CallbackContext) -> str:
     )
 
     if chat.type != "private":
-        log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+        log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
     return log_message
 
@@ -211,8 +210,7 @@ def addmod(update: Update, context: CallbackContext) -> str:
     user_member = bot.getChat(user_id)
     rt = ""
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -236,8 +234,9 @@ def addmod(update: Update, context: CallbackContext) -> str:
     MOD_USERS.append(user_id)
 
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Moderator!"
+        f"{rt}\nSuccessfully promoted {user_member.first_name} to a Moderator!"
     )
+
 
     log_message = (
         f"#MODERATOR\n"
@@ -246,7 +245,7 @@ def addmod(update: Update, context: CallbackContext) -> str:
     )
 
     if chat.type != "private":
-        log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+        log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
     return log_message
 
@@ -262,8 +261,7 @@ def removesudo(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     user_member = bot.getChat(user_id)
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -299,8 +297,7 @@ def removesupport(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     user_member = bot.getChat(user_id)
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -316,7 +313,7 @@ def removesupport(update: Update, context: CallbackContext) -> str:
         )
 
         if chat.type != "private":
-            log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+            log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
         return log_message
 
@@ -336,8 +333,7 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     user_member = bot.getChat(user_id)
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -353,7 +349,7 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
         )
 
         if chat.type != "private":
-            log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+            log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
         return log_message
     else:
@@ -372,8 +368,7 @@ def removemod(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     user_member = bot.getChat(user_id)
 
-    reply = check_user_id(user_id, context)
-    if reply:
+    if reply := check_user_id(user_id, context):
         message.reply_text(reply)
         return ""
 
@@ -389,7 +384,7 @@ def removemod(update: Update, context: CallbackContext) -> str:
         )
 
         if chat.type != "private":
-            log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
+            log_message = f"<b>{html.escape(chat.title)}:</b>\n{log_message}"
 
         return log_message
     else:
@@ -497,7 +492,7 @@ def devlist(update: Update, context: CallbackContext):
 @kigcmd(command="sysadmins", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
 def syslist(update: Update, context: CallbackContext):
     bot = context.bot
-    true_adm = list(set({SYS_ADMIN}))
+    true_adm = list({SYS_ADMIN})
     reply = "<b>System Admins :</b>\n"
     for each_user in true_adm:
         user_id = int(each_user)
@@ -519,6 +514,14 @@ __mod_name__ = "Nations"
 @kigcmd(command='nationshelp')
 def nationshelpp(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
+    if (
+        user_id is not OWNER_ID | SYS_ADMIN
+        and user_id not in SUDO_USERS
+        and user_id not in DEV_USERS
+        and user_id not in SUPPORT_USERS
+        and user_id not in WHITELIST_USERS
+    ):
+        return
     cmdlisttt = "List of commands that can be used bu the nations:\
         \n <b>selfunban</b> : unban user from a group (sudo+ and whitelist)\
         \n <b>rban</b> : remotely ban a user from a group (sudo+)\
@@ -539,7 +542,4 @@ def nationshelpp(update: Update, context: CallbackContext):
         \n <b>exec</b> (sys_admin)\
         \n <b>eval</b> (sys_admin)\
         \n <b>broadcast(all/group/users)</b> : broadcast a message (sys_admin)"
-    if user_id is not (OWNER_ID|SYS_ADMIN) and user_id not in SUDO_USERS and user_id not in DEV_USERS and user_id not in SUPPORT_USERS and user_id not in WHITELIST_USERS:
-        return
-    else:
-        update.effective_message.reply_text(cmdlisttt, parse_mode=ParseMode.HTML)
+    update.effective_message.reply_text(cmdlisttt, parse_mode=ParseMode.HTML)

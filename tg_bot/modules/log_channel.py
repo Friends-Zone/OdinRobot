@@ -53,8 +53,7 @@ if is_module_loaded(FILENAME):
                             result += f'\n<b>Link:</b> <a href="https://t.me/c/{cid}/{message.message_id}">click here</a>'
                 except AttributeError:
                     result += '\n<b>Link:</b> No link for manual actions.'
-                log_chat = sql.get_chat_log_channel(chat.id)
-                if log_chat:
+                if log_chat := sql.get_chat_log_channel(chat.id):
                     send_log(context, log_chat, chat.id, result)
 
             return result
@@ -81,8 +80,7 @@ if is_module_loaded(FILENAME):
                     else:
                         cid = str(chat.id).replace("-100", '')
                         result += f'\n<b>Link:</b> <a href="https://t.me/c/{cid}/{message.message_id}">click here</a>'
-                log_chat = GBAN_LOGS or OWNER_ID
-                if log_chat:
+                if log_chat := GBAN_LOGS or OWNER_ID:
                     send_log(context, log_chat, chat.id, result)
 
             return result
@@ -133,8 +131,7 @@ if is_module_loaded(FILENAME):
         message = update.effective_message
         chat = update.effective_chat
 
-        log_channel = sql.get_chat_log_channel(chat.id)
-        if log_channel:
+        if log_channel := sql.get_chat_log_channel(chat.id):
             log_channel_info = bot.get_chat(log_channel)
             message.reply_text(
                 f"This group has all it's logs sent to:"
@@ -198,8 +195,7 @@ if is_module_loaded(FILENAME):
         message = update.effective_message
         chat = update.effective_chat
 
-        log_channel = sql.stop_chat_logging(chat.id)
-        if log_channel:
+        if log_channel := sql.stop_chat_logging(chat.id):
             bot.send_message(
                 log_channel, f"Channel has been unlinked from {chat.title}"
             )
@@ -218,8 +214,7 @@ if is_module_loaded(FILENAME):
 
 
     def __chat_settings__(chat_id, user_id):
-        log_channel = sql.get_chat_log_channel(chat_id)
-        if log_channel:
+        if log_channel := sql.get_chat_log_channel(chat_id):
             log_channel_info = dispatcher.bot.get_chat(log_channel)
             return f"This group has all it's logs sent to: {escape_markdown(log_channel_info.title)} (`{log_channel}`)"
         return "No log channel is set for this group!"
@@ -294,23 +289,23 @@ def log_setting_callback(update: Update, context: CallbackContext):
     t = sql.get_chat_setting(chat.id)
     if setting == "warn":
         r = t.toggle_warn()
-        cb.answer("Warning log set to {}".format(r))
+        cb.answer(f"Warning log set to {r}")
         return
     if setting == "act":
         r = t.toggle_action()
-        cb.answer("Action log set to {}".format(r))
+        cb.answer(f"Action log set to {r}")
         return
     if setting == "join":
         r = t.toggle_joins()
-        cb.answer("Join log set to {}".format(r))
+        cb.answer(f"Join log set to {r}")
         return
     if setting == "leave":
         r = t.toggle_leave()
-        cb.answer("Leave log set to {}".format(r))
+        cb.answer(f"Leave log set to {r}")
         return
     if setting == "rep":
         r = t.toggle_report()
-        cb.answer("Report log set to {}".format(r))
+        cb.answer(f"Report log set to {r}")
         return
 
     cb.answer("Idk what to do")

@@ -65,7 +65,7 @@ def report(update: Update, context: CallbackContext) -> str:
     message = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
-    
+
     log_setting = logsql.get_chat_setting(chat.id)
     if not log_setting:
         logsql.set_chat_setting(logsql.LogChannelSettings(chat.id, True, True, True, True, True))
@@ -131,14 +131,16 @@ def report(update: Update, context: CallbackContext) -> str:
                 InlineKeyboardButton(
                     "❌ Close Panel",
                     callback_data=f"reported_{chat.id}=close={reported_user.id}",
-                )
+                ),
             ],
             [
                 InlineKeyboardButton(
-                        "📝 Read the rules", url="t.me/{}?start={}".format(bot.username, chat.id)
-                    )
+                    "📝 Read the rules",
+                    url=f"t.me/{bot.username}?start={chat.id}",
+                )
             ],
         ]
+
         reply_markup2 = InlineKeyboardMarkup(keyboard2)
         reportmsg = f"{mention_html(reported_user.id, reported_user.first_name)} was reported to the admins."
         reportmsg += tmsg
@@ -189,7 +191,7 @@ def buttons(update: Update, context: CallbackContext):
         try:
             bot.deleteMessage(splitter[0], splitter[3])
             query.answer("✅ Message Deleted")
-            
+
             kyb_no_del = [
                 [
                     InlineKeyboardButton(
@@ -209,11 +211,13 @@ def buttons(update: Update, context: CallbackContext):
                 ],
                 [
                     InlineKeyboardButton(
-                            "📝 Read the rules", url="t.me/{}?start={}".format(bot.username, splitter[0]),
-                        )
+                        "📝 Read the rules",
+                        url=f"t.me/{bot.username}?start={splitter[0]}",
+                    )
                 ],
             ]
-            
+
+
             query.edit_message_reply_markup(
                 InlineKeyboardMarkup(kyb_no_del)
             )
@@ -232,15 +236,17 @@ def buttons(update: Update, context: CallbackContext):
     elif splitter[1] == "close":
         try:
             query.answer("✅ Panel Closed!")
-            
+
             kyb_no_del = [
                 [
                     InlineKeyboardButton(
-                            "📝 Read the rules", url="t.me/{}?start={}".format(bot.username, splitter[0]),
-                        )
-                ],
+                        "📝 Read the rules",
+                        url=f"t.me/{bot.username}?start={splitter[0]}",
+                    )
+                ]
             ]
-            
+
+
             query.edit_message_reply_markup(
                 InlineKeyboardMarkup(kyb_no_del)
             )

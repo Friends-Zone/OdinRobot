@@ -111,7 +111,7 @@ def gban(update: Update, context: CallbackContext):  # sourcery no-metrics
         message.reply_text("That's a Moderator, why do you want to ban them?")
         return
 
-    elif int(user_id) in (777000, 1087968824, 136817688):
+    elif int(user_id) in {777000, 1087968824, 136817688}:
         message.reply_text("Huh, why would I gban Telegram bots?")
         return
 
@@ -236,9 +236,10 @@ def gban(update: Update, context: CallbackContext):  # sourcery no-metrics
 
     if GBAN_LOGS:
         logmsg.edit_text(
-            log_message + f"\n<b>Chats affected:</b> <code>{gbanned_chats}</code>",
+            f"{log_message}\n<b>Chats affected:</b> <code>{gbanned_chats}</code>",
             parse_mode=ParseMode.HTML,
         )
+
     else:
         send_to_list(
             bot,
@@ -360,9 +361,10 @@ def ungban(update: Update, context: CallbackContext):  # sourcery no-metrics
 
     if GBAN_LOGS:
         log.edit_text(
-            log_message + f"\n<b>Chats affected:</b> {ungbanned_chats}",
+            f"{log_message}\n<b>Chats affected:</b> {ungbanned_chats}",
             parse_mode=ParseMode.HTML,
         )
+
     else:
         send_to_list(bot, SUDO_USERS + SUPPORT_USERS, "un-gban complete!")
 

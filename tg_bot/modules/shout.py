@@ -12,8 +12,11 @@ def shout(update: Update, context: CallbackContext):
         return update.effective_message.reply_text("What do you want me to shout?", parse_mode="MARKDOWN")
     text = " ".join(args)
     result = [" ".join(list(text))]
-    for pos, symbol in enumerate(text[1:]):
-        result.append(symbol + " " + "  " * pos + symbol)
+    result.extend(
+        f"{symbol} " + "  " * pos + symbol
+        for pos, symbol in enumerate(text[1:])
+    )
+
     result = list("\n".join(result))
     result[0] = text[0]
     result = "".join(result)

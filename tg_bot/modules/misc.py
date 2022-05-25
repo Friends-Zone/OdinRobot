@@ -76,10 +76,7 @@ def get_id(update: Update, context: CallbackContext):
     message = update.effective_message
     chat = update.effective_chat
     msg = update.effective_message
-    user_id = extract_user(msg, args)
-
-    if user_id:
-
+    if user_id := extract_user(msg, args):
         if msg.reply_to_message and msg.reply_to_message.forward_from:
 
             user1 = message.reply_to_message.from_user
@@ -103,17 +100,15 @@ def get_id(update: Update, context: CallbackContext):
                 parse_mode=ParseMode.HTML,
             )
 
+    elif chat.type == "private":
+        msg.reply_text(
+            f"<b>Your id is:</b> \n  <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+        )
+
     else:
-
-        if chat.type == "private":
-            msg.reply_text(
-                f"<b>Your id is:</b> \n  <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
-            )
-
-        else:
-            msg.reply_text(
-                f"<b>This group's id is:</b> \n  <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
-            )
+        msg.reply_text(
+            f"<b>This group's id is:</b> \n  <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+        )
 
 @kigcmd(command='gifid')
 @spamcheck
@@ -132,7 +127,7 @@ def gifid(update: Update, _):
 def printdata(update: Update, context: CallbackContext):  # sourcery no-metrics
     print(GLOBAL_USER_DATA)
     gd = str(GLOBAL_USER_DATA)
-    dispatcher.bot.sendMessage(Owner, "`{}`".format(gd), parse_mode="markdown")
+    dispatcher.bot.sendMessage(Owner, f"`{gd}`", parse_mode="markdown")
 
 
 @kigcmd(command="resetantispam", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
@@ -142,7 +137,7 @@ def resetglobaldata(update: Update, context: CallbackContext):
     global GLOBAL_USER_DATA
     log_input(update)
     gd = str(GLOBAL_USER_DATA)
-    dispatcher.bot.sendMessage(Owner, "`{}`".format(gd), parse_mode="markdown")
+    dispatcher.bot.sendMessage(Owner, f"`{gd}`", parse_mode="markdown")
     try:
         GLOBAL_USER_DATA = {}
     except Exception as e:
@@ -156,8 +151,7 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
-    user_id = extract_user(update.effective_message, args)
-    if user_id:
+    if user_id := extract_user(update.effective_message, args):
         user = bot.get_chat(user_id)
     elif not message.reply_to_message and not args:
         user = message.sender_chat or message.from_user
@@ -193,8 +187,7 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
-    user_id = extract_user(update.effective_message, args)
-    if user_id:
+    if user_id := extract_user(update.effective_message, args):
         user = bot.get_chat(user_id)
     elif not message.reply_to_message and not args:
         user = (
@@ -263,20 +256,20 @@ def get_user_info(user, chat, full_info=False):
         try:
             user_member = chat.get_member(user.id)
             if user_member.status == "left":
-                    text += f"\nㅤ<b>Presence:</b> Not here"
+                text += f"\nㅤ<b>Presence:</b> Not here"
             elif user_member.status == "kicked":
                     text += f"\nㅤ<b>Presence:</b> Banned"
             elif user_member.status == "member":
-                    text += f"\nㅤ<b>Presence:</b> Detected"
-                    if not user.id in WHITELISTS:
-                        try:   #? approval
-                            from .sql import approve_sql as asql
-                            if asql.is_approved(chat.id, user.id):
-                                text += "\nㅤ<b>Approved:</b> True"
-                            else:
-                                text += "\nㅤ<b>Approved:</b> False"
-                        except:
-                            pass
+                text += f"\nㅤ<b>Presence:</b> Detected"
+                if user.id not in WHITELISTS:
+                    try:   #? approval
+                        from .sql import approve_sql as asql
+                        if asql.is_approved(chat.id, user.id):
+                            text += "\nㅤ<b>Approved:</b> True"
+                        else:
+                            text += "\nㅤ<b>Approved:</b> False"
+                    except:
+                        pass
 
             if user_member.status == "administrator":
                 result = bot.get_chat_member(chat.id, user.id).to_dict()
@@ -302,15 +295,13 @@ def get_user_info(user, chat, full_info=False):
 
         if (
             user.id
-            in [777000, 1087968824, dispatcher.bot.id, OWNER_ID, SYS_ADMIN]
+            not in [777000, 1087968824, dispatcher.bot.id, OWNER_ID, SYS_ADMIN]
             + DEV_USERS
             + SUDO_USERS
             + SUPPORT_USERS
             + WHITELIST_USERS
             + MOD_USERS
-            ):
-                pass #text += ""
-        else:
+        ):
             try:
                 spamwtc = sw.get_ban(int(user.id))
                 if sw.get_ban(int(user.id)):
@@ -344,8 +335,7 @@ def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
     bot = context.bot
     args = context.args
     message = update.effective_message
-    user_id = extract_user(update.effective_message, args)
-    if user_id:
+    if user_id := extract_user(update.effective_message, args):
         user = bot.get_chat(user_id)
 
     elif not message.reply_to_message and not args:
@@ -453,7 +443,7 @@ def get_readable_time(seconds: int) -> str:
     for x in range(len(time_list)):
         time_list[x] = str(time_list[x]) + time_suffix_list[x]
     if len(time_list) == 4:
-        ping_time += time_list.pop() + ", "
+        ping_time += f"{time_list.pop()}, "
 
     time_list.reverse()
     ping_time += ":".join(time_list)
@@ -469,8 +459,8 @@ def uptimee(update: Update, _):
     uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
     msg = update.effective_message
-    rspnc = "*• Uptime:* " + str(botuptime) + "\n"
-    rspnc += "*• System Start time:* " + str(uptime)
+    rspnc = f"*• Uptime:* {str(botuptime)}" + "\n"
+    rspnc += f"*• System Start time:* {str(uptime)}"
     msg.reply_text(rspnc, parse_mode=ParseMode.MARKDOWN)
 
 @kigcmd(command='stats', can_disable=False)
@@ -480,23 +470,23 @@ def stats(update, context):
     uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
     status = "*╒═══「 System statistics: 」*\n\n"
-    status += "*• System Start time:* " + str(uptime) + "\n"
+    status += f"*• System Start time:* {str(uptime)}" + "\n"
     uname = platform.uname()
-    status += "*• System:* " + str(uname.system) + "\n"
-    status += "*• Node name:* " + escape_markdown(str(uname.node)) + "\n"
-    status += "*• Release:* " + escape_markdown(str(uname.release)) + "\n"
-    status += "*• Machine:* " + escape_markdown(str(uname.machine)) + "\n"
+    status += f"*• System:* {str(uname.system)}" + "\n"
+    status += f"*• Node name:* {escape_markdown(str(uname.node))}" + "\n"
+    status += f"*• Release:* {escape_markdown(str(uname.release))}" + "\n"
+    status += f"*• Machine:* {escape_markdown(str(uname.machine))}" + "\n"
 
     mem = virtual_memory()
     cpu = cpu_percent()
     disk = disk_usage("/")
-    status += "*• CPU:* " + str(cpu) + " %\n"
-    status += "*• RAM:* " + str(mem[2]) + " %\n"
-    status += "*• Storage:* " + str(disk[3]) + " %\n\n"
-    status += "*• Python version:* " + python_version() + "\n"
-    status += "*• python-telegram-bot:* " + str(ptbver) + "\n"
-    status += "*• Uptime:* " + str(botuptime) + "\n"
-    status += "*• Database size:* " + str(db_size) + "\n"
+    status += f"*• CPU:* {str(cpu)}" + " %\n"
+    status += f"*• RAM:* {str(mem[2])}" + " %\n"
+    status += f"*• Storage:* {str(disk[3])}" + " %\n\n"
+    status += f"*• Python version:* {python_version()}" + "\n"
+    status += f"*• python-telegram-bot:* {str(ptbver)}" + "\n"
+    status += f"*• Uptime:* {str(botuptime)}" + "\n"
+    status += f"*• Database size:* {str(db_size)}" + "\n"
     kb = [
           [
            InlineKeyboardButton('Ping', callback_data='pingCB')
@@ -557,7 +547,7 @@ def pingCallback(update: Update, context: CallbackContext):
         requests.get('https://api.telegram.org')
         end_time = time.time()
         ping_time = round((end_time - start_time) * 1000, 3)
-        query.answer('Telegram API Responce: {}ms'.format(ping_time))
+        query.answer(f'Telegram API Responce: {ping_time}ms')
 
 
 def get_help(chat):

@@ -55,8 +55,6 @@ def check_user(user_id: int, bot: Bot, update: Update) -> Optional[str]:
     if user_is_admin(update, user_id) and user_id not in DEV_USERS:
         if user_id == OWNER_ID:
             return "I'd never ban my owner."
-        elif user_id in DEV_USERS:
-            return "I can't act against our own."
         elif user_id in SUDO_USERS:
             return "My sudos are ban immune"
         elif user_id in SUPPORT_USERS:
@@ -87,9 +85,7 @@ def mute(update: Update, context: CallbackContext) -> str:
     user = update.effective_user
 
     user_id, reason = extract_user_and_text(message, args)
-    reply = check_user(user_id, bot, update)
-
-    if reply:
+    if reply := check_user(user_id, bot, update):
         message.reply_text(reply)
         return ""
 
@@ -108,9 +104,8 @@ def mute(update: Update, context: CallbackContext) -> str:
     if member.can_send_messages is None or member.can_send_messages:
         chat_permissions = ChatPermissions(can_send_messages=False)
         bot.restrict_chat_member(chat.id, user_id, chat_permissions)
-        mutemsg = "{} was muted by {} in <b>{}</b>".format(
-                    mention_html(member.user.id, member.user.first_name), user.first_name, message.chat.title
-        )
+        mutemsg = f"{mention_html(member.user.id, member.user.first_name)} was muted by {user.first_name} in <b>{message.chat.title}</b>"
+
         if reason:
             mutemsg += f"\n<b>Reason</b>: <code>{reason}</code>"
 
@@ -119,11 +114,12 @@ def mute(update: Update, context: CallbackContext) -> str:
             [
                 [
                     InlineKeyboardButton(
-                        "🔊 Unmute", callback_data="cb_unmute({})".format(user_id)
+                        "🔊 Unmute", callback_data=f"cb_unmute({user_id})"
                     )
                 ]
             ]
         )
+
 
         context.bot.send_message(
             chat.id,
@@ -155,7 +151,7 @@ def button(update: Update, context: CallbackContext) -> str:
     if match and admeme.status == "administrator":
 
         bot = context.bot
-        user_id = match.group(1)
+        user_id = match[1]
         chat: Optional[Chat] = update.effective_chat
         user_member = chat.get_member(user_id)
 
@@ -190,9 +186,10 @@ def button(update: Update, context: CallbackContext) -> str:
 
 
             update.effective_message.edit_text(
-                "{} was unmuted by {}.".format(mention_html(user_id, user_member.user.first_name), user.first_name),
+                f"{mention_html(user_id, user_member.user.first_name)} was unmuted by {user.first_name}.",
                 parse_mode=ParseMode.HTML,
             )
+
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"#UNMUTE\n"
@@ -284,9 +281,7 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
     user = update.effective_user
 
     user_id, reason = extract_user_and_text(message, args)
-    reply = check_user(user_id, bot, update)
-
-    if reply:
+    if reply := check_user(user_id, bot, update):
         message.reply_text(reply)
         return ""
 

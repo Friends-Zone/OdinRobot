@@ -57,11 +57,10 @@ def clearcmd(update: Update, context: CallbackContext):
     ]
 
     if len(args) == 0:
-        commands = sql.get_allclearcmd(chat.id)
-        if commands:
+        if commands := sql.get_allclearcmd(chat.id):
             msg += "*Command - Time*\n"
             for cmd in commands:
-                msg += f"`{cmd.cmd} - {cmd.time} secs`\n"  
+                msg += f"`{cmd.cmd} - {cmd.time} secs`\n"
         else:
             msg = f"No deletion time has been set for any command in *{chat.title}*"
 
@@ -74,15 +73,14 @@ def clearcmd(update: Update, context: CallbackContext):
         elif cmd == "restore":
             delcmd = sql.del_allclearcmd(chat.id)
             msg = "Removed all commands from list"
+        elif cmd := sql.get_clearcmd(chat.id, cmd):
+            msg = f"`{cmd.cmd}` output is set to be deleted after *{cmd.time}* seconds in *{chat.title}*"
         else:
-            cmd = sql.get_clearcmd(chat.id, cmd)
-            if cmd:
-                msg = f"`{cmd.cmd}` output is set to be deleted after *{cmd.time}* seconds in *{chat.title}*"
-            else:
-                if cmd not in commands:
-                    msg = "Invalid command. Check module help for more details"
-                else:
-                    msg = f"This command output hasn't been set to be deleted in *{chat.title}*"
+            msg = (
+                "Invalid command. Check module help for more details"
+                if cmd not in commands
+                else f"This command output hasn't been set to be deleted in *{chat.title}*"
+            )
 
     elif len(args) == 2:
         cmd = args[0].lower()
@@ -98,7 +96,7 @@ def clearcmd(update: Update, context: CallbackContext):
                msg = "Time must be between 5 and 300 seconds"
         else:
             msg = "Specify a valid command. Use `/clearcmd list` to see available commands"
-                
+
     else:
         msg = "I don't understand what are you trying to do. Check module help for more details"
 

@@ -40,7 +40,6 @@ def get_sibyl_setting(chat_id):
 
 
 @kigmsg(Filters.chat_type.groups, group=101)
-# @bot_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS)
 @loggable
 def sibyl_ban(update: Update, context: CallbackContext) -> Optional[str]:
     message = update.effective_message
@@ -78,10 +77,14 @@ def sibyl_ban(update: Update, context: CallbackContext) -> Optional[str]:
             txt = '''{} has a <a href="https://t.me/SibylSystem/3">Crime Coefficient</a> of {}\n'''.format(
                 user.mention_html(), data.crime_coefficient,
             )
-            txt += "<b>Enforcement Mode:</b> {}".format(
-                "Lethal Eliminator" if not data.is_bot else "Destroy Decomposer",
+            txt += f'<b>Enforcement Mode:</b> {"Destroy Decomposer" if data.is_bot else "Lethal Eliminator"}'
+
+            log_msg = (
+                f'#SIBYL_BAN #{", #".join(data.ban_flags)}'
+                if data.ban_flags
+                else "#SIBYL_BAN"
             )
-            log_msg = "#SIBYL_BAN #{}".format(", #".join(data.ban_flags)) if data.ban_flags else "#SIBYL_BAN"
+
             log_msg += f"\n • <b>User:</b> {user.mention_html()}\n"
             log_msg += f" • <b>Reason:</b> <code>{data.reason}</code>\n" if data.reason else ""
             log_msg += f" • <b>Ban time:</b> <code>{data.date}</code>" if data.date else ""
@@ -132,7 +135,12 @@ def sibyl_ban_alert(update: Update, context: CallbackContext) -> Optional[str]:
                 keyboard = [[InlineKeyboardButton(text="More Info", url=url)]]
 
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                log_msg = "#SIBYL_BAN #{}".format(", #".join(data.ban_flags)) if data.ban_flags else "#SIBYL_BAN"
+                log_msg = (
+                    f'#SIBYL_BAN #{", #".join(data.ban_flags)}'
+                    if data.ban_flags
+                    else "#SIBYL_BAN"
+                )
+
                 log_msg += f"\n • <b>User:</b> {user.mention_html()}\n"
                 log_msg += f" • <b>Reason:</b> <code>{data.reason}</code>\n" if data.reason else ""
                 log_msg += f" • <b>Ban time:</b> <code>{data.date}</code>\n" if data.date else ""
@@ -169,7 +177,12 @@ def handle_sibyl_banned(user, data):
                 bot.ban_chat_member(chat_id=c, user_id=user.id)
 
             if log_stat:
-                log_msg = "#SIBYL_BAN #{}".format(", #".join(data.ban_flags)) if data.ban_flags else "#SIBYL_BAN"
+                log_msg = (
+                    f'#SIBYL_BAN #{", #".join(data.ban_flags)}'
+                    if data.ban_flags
+                    else "#SIBYL_BAN"
+                )
+
                 log_msg += f" • <b>User</b> {user.mention_html()}\n"
                 log_msg += f" • <b>Reason:</b> <code>{data.reason}</code>\n" if data.reason else ""
                 log_msg += f" • <b>Ban time:</b> <code>{data.date}</code>\n" if data.date else ""
@@ -286,11 +299,11 @@ def sibyltoggle(update: Update, _: CallbackContext):
         [
             InlineKeyboardButton(
                 SibylMode(2).name if act != 2 else SibylMode(1).name,
-                callback_data=f"sibyl_toggle={int(2 if not act == 2 else 1)}",
+                callback_data=f"sibyl_toggle={2 if act != 2 else 1}",
             ),
             InlineKeyboardButton(
-                SibylMode(3).name + " Only" if act != 3 else SibylMode(1).name,
-                callback_data=f'sibyl_toggle={int(3 if act != 3 else 1)}',
+                f"{SibylMode(3).name} Only" if act != 3 else SibylMode(1).name,
+                callback_data=f'sibyl_toggle={3 if act != 3 else 1}',
             ),
         ],
         [
@@ -308,6 +321,7 @@ def sibyltoggle(update: Update, _: CallbackContext):
             ),
         ],
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
@@ -392,7 +406,7 @@ def get_sibyl_info(bot: Bot, user: User, detailed: bool = False) -> (str, Option
         data = None
 
     if data:
-        txt += f"\n • <b>Banned:</b> <code>{'No' if not data.banned else 'Yes'}</code>"
+        txt += f"\n • <b>Banned:</b> <code>{'Yes' if data.banned else 'No'}</code>"
         cc = data.crime_coefficient or "?"
         txt += f"\n • <b>Crime Coefficient:</b> <code>{cc}</code> [<a href='https://t.me/SibylSystem/3'>?</a>]"
         hue = data.hue_color or "?"

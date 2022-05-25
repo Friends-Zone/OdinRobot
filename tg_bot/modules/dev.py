@@ -25,7 +25,7 @@ def leave(update: Update, context: CallbackContext):
         chat_id = str(args[0])
         leave_msg = " ".join(args[1:])
         try:
-            if len(leave_msg) >= 1:
+            if leave_msg:
                 context.bot.send_message(chat_id, leave_msg)
             bot.leave_chat(int(chat_id))
             try:
@@ -37,10 +37,19 @@ def leave(update: Update, context: CallbackContext):
     elif update.effective_message.chat.type != "private":
         chat = update.effective_chat
         # user = update.effective_user
-        kb = [[
-            InlineKeyboardButton(text="I am sure of this action.", callback_data="leavechat_cb_({})".format(chat.id))
-        ]]
-        update.effective_message.reply_text("I'm going to leave {}, press the button below to confirm".format(chat.title), reply_markup=InlineKeyboardMarkup(kb))
+        kb = [
+            [
+                InlineKeyboardButton(
+                    text="I am sure of this action.",
+                    callback_data=f"leavechat_cb_({chat.id})",
+                )
+            ]
+        ]
+
+        update.effective_message.reply_text(
+            f"I'm going to leave {chat.title}, press the button below to confirm",
+            reply_markup=InlineKeyboardMarkup(kb),
+        )
 
 @kigcallback(pattern=r"leavechat_cb_", run_async=True)
 def leave_cb(update: Update, context: CallbackContext):
@@ -51,7 +60,7 @@ def leave_cb(update: Update, context: CallbackContext):
         return
 
     match = re.match(r"leavechat_cb_\((.+?)\)", callback.data)
-    chat = int(match.group(1))
+    chat = int(match[1])
     callback.edit_message_text("I'm outa here.")
     bot.leave_chat(chat_id=chat)
 
@@ -138,15 +147,14 @@ def pip_install(update: Update, context: CallbackContext):
         message.reply_text("Enter a package name.")
         return
     if len(args) >= 1:
-        cmd = "py -m pip install {}".format(' '.join(args))
+        cmd = f"py -m pip install {' '.join(args)}"
         process = subprocess.Popen(
             cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
         )
         stdout, stderr = process.communicate()
         reply = ""
         stderr = stderr.decode()
-        stdout = stdout.decode()
-        if stdout:
+        if stdout := stdout.decode():
             reply += f"*Stdout*\n`{stdout}`\n"
         if stderr:
             reply += f"*Stderr*\n`{stderr}`\n"
@@ -159,7 +167,7 @@ def allow_groups(update: Update, context: CallbackContext):
     args = context.args
     global ALLOW_CHATS
     if not args:
-        state = "Lockdown is " + "on" if not ALLOW_CHATS else "off"
+        state = "off" if ALLOW_CHATS else "Lockdown is " + "on"
         update.effective_message.reply_text(f"Current state: {state}")
         return
     if args[0].lower() in ["off", "no"]:
@@ -172,9 +180,7 @@ def allow_groups(update: Update, context: CallbackContext):
     update.effective_message.reply_text("Done! lockdown value toggled.")
 
 @kigcmd(command='getinfo') # todo: flood fed rules gbanstat locks? reports
-# ! make as chat and get current if possible
-# ? spacing?
-@dev_plus      
+@dev_plus
 def get_chat_by_id(update: Update, context: CallbackContext):
     msg = update.effective_message
     args = context.args
@@ -183,8 +189,11 @@ def get_chat_by_id(update: Update, context: CallbackContext):
         return
     if len(args) >= 1:
         data = context.bot.get_chat(args[0])
-        m = "<b>Found chat, below are the details.</b>\n\n"
-        m += "<b>Title</b>: {}\n".format(html.escape(data.title))
+        m = (
+            "<b>Found chat, below are the details.</b>\n\n"
+            + "<b>Title</b>: {}\n".format(html.escape(data.title))
+        )
+
         m += "<b>Members</b>: {}\n\n".format(data.get_member_count())
         if data.description:
             m += "<i>{}</i>\n\n".format(html.escape(data.description))
@@ -208,11 +217,13 @@ def get_chat_by_id(update: Update, context: CallbackContext):
 @kigcmd(command='ignored')
 @dev_plus
 def get_whos_ignored(update: Update, _: CallbackContext):
-    txt = "<b>Ignored chats:</b>\n<code>"
-    txt += "</code>, <code>".join(["{}".format(chat) for chat in IGNORED_CHATS])
+    txt = "<b>Ignored chats:</b>\n<code>" + "</code>, <code>".join(
+        [f"{chat}" for chat in IGNORED_CHATS]
+    )
+
     txt += "</code>\n\n"
     txt += "<b>Ignored users:</b>\n<code>"
-    txt += "</code>, <code>".join(["{}".format(chat) for chat in IGNORED_USERS])
+    txt += "</code>, <code>".join([f"{chat}" for chat in IGNORED_USERS])
     txt += "</code>"
     update.effective_message.reply_text(txt, parse_mode=ParseMode.HTML)
 

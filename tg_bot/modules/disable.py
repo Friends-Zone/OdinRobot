@@ -75,8 +75,7 @@ if is_module_loaded(FILENAME):
                     if SpamChecker.check_user(user_id):
                         return None
 
-                    filter_result = self.filters(update)
-                    if filter_result:
+                    if filter_result := self.filters(update):
                         chat = update.effective_chat
                         user = update.effective_user
                         # disabled, admincmd, user admin
@@ -85,11 +84,7 @@ if is_module_loaded(FILENAME):
                             is_disabled = command[
                                 0
                             ] in ADMIN_CMDS and user_is_admin(update, user.id)
-                            if not is_disabled:
-                                return None
-                            else:
-                                return args, filter_result
-
+                            return (args, filter_result) if is_disabled else None
                         return args, filter_result
                     else:
                         return False
@@ -100,25 +95,24 @@ if is_module_loaded(FILENAME):
             DISABLE_OTHER.append(friendly or pattern)
             self.friendly = friendly or pattern
         def check_update(self, update):
-            if isinstance(update, Update) and update.effective_message:
-                chat = update.effective_chat
+            if not isinstance(update, Update) or not update.effective_message:
+                return
+            try:
+                user_id = update.effective_user.id
+            except:
+                user_id = None
 
-                try:
-                    user_id = update.effective_user.id
-                except:
-                    user_id = None
-
-                if self.filters(update):
-                    if SpamChecker.check_user(user_id):
-                        return None
-                    if sql.is_command_disabled(chat.id, self.friendly):
-                        return False
-                    return True
-                return False
+            chat = update.effective_chat
+            if self.filters(update):
+                if SpamChecker.check_user(user_id):
+                    return None
+                if sql.is_command_disabled(chat.id, self.friendly):
+                    return False
+                return True
+            return False
 
 
     @spamcheck
-    # @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @typing_action
     def disable(update, context):
@@ -148,11 +142,9 @@ if is_module_loaded(FILENAME):
             if disable_cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 sql.disable_command(chat.id, disable_cmd)
                 if conn:
-                    text = "Disabled the use of `{}` command in *{}*!".format(
-                        disable_cmd, chat_name
-                    )
+                    text = f"Disabled the use of `{disable_cmd}` command in *{chat_name}*!"
                 else:
-                    text = "Disabled the use of `{}` command!".format(disable_cmd)
+                    text = f"Disabled the use of `{disable_cmd}` command!"
                 send_message(
                     update.effective_message,
                     text,
@@ -164,7 +156,6 @@ if is_module_loaded(FILENAME):
         else:
             send_message(update.effective_message, "What should I disable?")
     @spamcheck
-    # @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @typing_action
     def enable(update, context):
@@ -195,11 +186,9 @@ if is_module_loaded(FILENAME):
 
             if sql.enable_command(chat.id, enable_cmd):
                 if conn:
-                    text = "Enabled the use of `{}` command in *{}*!".format(
-                        enable_cmd, chat_name
-                    )
+                    text = f"Enabled the use of `{enable_cmd}` command in *{chat_name}*!"
                 else:
-                    text = "Enabled the use of `{}` command!".format(enable_cmd)
+                    text = f"Enabled the use of `{enable_cmd}` command!"
                 send_message(
                     update.effective_message,
                     text,
@@ -240,8 +229,7 @@ if is_module_loaded(FILENAME):
     def commands(update, context):
         chat = update.effective_chat
         user = update.effective_user
-        conn = connected(context.bot, update, chat, user.id, need_admin=True)
-        if conn:
+        if conn := connected(context.bot, update, chat, user.id, need_admin=True):
             chat = dispatcher.bot.getChat(conn)
             chat_id = conn
         else:
@@ -263,9 +251,7 @@ if is_module_loaded(FILENAME):
             sql.disable_command(chat_id, disable_cmd)
 
     def __stats__():
-        return "• {} disabled items, across {} chats.".format(
-            sql.num_disabled(), sql.num_chats()
-        )
+        return f"• {sql.num_disabled()} disabled items, across {sql.num_chats()} chats."
 
     def __migrate__(old_chat_id, new_chat_id):
         sql.migrate_chat(old_chat_id, new_chat_id)

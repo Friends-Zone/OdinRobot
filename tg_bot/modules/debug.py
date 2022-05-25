@@ -87,7 +87,6 @@ def astoggle(update: Update, context: CallbackContext):
         message.reply_text("Antispam module is currently off.")
 
 @register(pattern='.*')
-# @telethn.on(events.NewMessage(pattern="[/!>].*"))
 async def i_do_nothing_yes(event):
     global DEBUG_MODE
     if DEBUG_MODE:
@@ -96,7 +95,7 @@ async def i_do_nothing_yes(event):
             with open("updates.txt", "r") as f:
                 text = f.read()
             with open("updates.txt", "w+") as f:
-                f.write(text + f"\n-{event.from_id} ({event.chat_id}) : {event.text}")
+                f.write(f"{text}\n-{event.from_id} ({event.chat_id}) : {event.text}")
         else:
             with open("updates.txt", "w+") as f:
                 f.write(
@@ -114,7 +113,7 @@ def logs(update: Update, context: CallbackContext):
 
     user = update.effective_user
 
-    logsname = "{}_logs.txt".format(dispatcher.bot.username)
+    logsname = f"{dispatcher.bot.username}_logs.txt"
 
     # https://pythonexamples.org/python-replace-string-in-file/
     logstxt = open("logs.txt", "rt")
@@ -135,7 +134,7 @@ def updates_log(update: Update, context: CallbackContext):
     if not os.path.exists('updates.txt'):
         update.effective_message.reply_text("File doesn't exist")
         return
-    updatesname = "{}_updates.txt".format(dispatcher.bot.username)
+    updatesname = f"{dispatcher.bot.username}_updates.txt"
 
     # https://pythonexamples.org/python-replace-string-in-file/
     updatestxt = open("updates.txt", "rt")

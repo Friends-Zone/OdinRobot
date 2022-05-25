@@ -69,12 +69,13 @@ class ConfigParser(ConfigParser):
         log.debug("Using the supplied config vars!")
         var_dict = {
             self.optionxform(
-                    key.split(str(section).upper() + "__")[1].lower()
+                key.split(f"{str(section).upper()}__")[1].lower()
             ): value
             for key, value in config_vars.items()
             if value is not None
-            and str(key).startswith(str(section).upper() + "__")
+            and str(key).startswith(f"{str(section).upper()}__")
         }
+
         return ChainMap(var_dict, {}, self._defaults)
 
 
@@ -142,12 +143,10 @@ class KigyoINIT:
             return None
         else:
             try:
-                sw = spamwatch.Client(spamwatch_api)
-                return sw
+                return spamwatch.Client(spamwatch_api)
             except:
-                sw = None
                 log.warning("Can't connect to SpamWatch!")
-                return sw
+                return None
 
 
 KInit = KigyoINIT(parser=kigconfig)
@@ -233,12 +232,25 @@ sw = KInit.init_sw()
 
 from tg_bot.modules.sql import SESSION
 
-if not KInit.DROP_UPDATES:
-    updater: Updater = tg.Updater(token=TOKEN, base_url=KInit.BOT_API_URL, base_file_url=KInit.BOT_API_FILE_URL, workers=min(32, os.cpu_count() + 4), request_kwargs={"read_timeout": 10, "connect_timeout": 10}, persistence=PostgresPersistence(session=SESSION))
-    
-else:
-    updater = tg.Updater(token=TOKEN, base_url=KInit.BOT_API_URL, base_file_url=KInit.BOT_API_FILE_URL, workers=min(32, os.cpu_count() + 4), request_kwargs={"read_timeout": 10, "connect_timeout": 10})
-    
+updater = (
+    tg.Updater(
+        token=TOKEN,
+        base_url=KInit.BOT_API_URL,
+        base_file_url=KInit.BOT_API_FILE_URL,
+        workers=min(32, os.cpu_count() + 4),
+        request_kwargs={"read_timeout": 10, "connect_timeout": 10},
+    )
+    if KInit.DROP_UPDATES
+    else tg.Updater(
+        token=TOKEN,
+        base_url=KInit.BOT_API_URL,
+        base_file_url=KInit.BOT_API_FILE_URL,
+        workers=min(32, os.cpu_count() + 4),
+        request_kwargs={"read_timeout": 10, "connect_timeout": 10},
+        persistence=PostgresPersistence(session=SESSION),
+    )
+)
+
 telethn = TelegramClient(MemorySession(), APP_ID, API_HASH)
 dispatcher: Dispatcher = updater.dispatcher
 j: Updater.job_queue = updater.job_queue
@@ -279,19 +291,23 @@ def spamcheck(func):
         except AttributeError:
             return
         if IS_DEBUG:
-            print("{} | {} | {} | {}".format(message.text or message.caption, user.id, message.chat.title, chat.id))
+            print(
+                f"{message.text or message.caption} | {user.id} | {message.chat.title} | {chat.id}"
+            )
+
         # If msg from self, return True
-        if user.id == context.bot.id:
-            return False
-        elif user.id == "777000":
+        if (
+            user.id == context.bot.id
+            or user.id == "777000"
+            or (not antispam_module or not ANTISPAM_TOGGLE)
+            and int(user.id) in SPAMMERS
+        ):
             return False
         elif antispam_module and ANTISPAM_TOGGLE:
             parsing_date = time.mktime(message.date.timetuple())
             if detect_user(user.id, chat.id, message, parsing_date):
                 return False
             antispam_restrict_user(user.id, parsing_date)
-        elif int(user.id) in SPAMMERS:
-            return False
         elif str(chat.id) in GROUP_BLACKLIST:
             dispatcher.bot.sendMessage(chat.id, "This group is blacklisted, I'm outa here...")
             dispatcher.bot.leaveChat(chat.id)

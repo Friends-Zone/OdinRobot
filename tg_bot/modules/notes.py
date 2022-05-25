@@ -171,7 +171,14 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
 def cmd_get(update: Update, context: CallbackContext):
     args = context.args
     if len(args) >= 2:
-        get(update, context, args[0].lower(), show_none=True, no_format=bool(args[1].lower() in ["raw", "noformat"]))
+        get(
+            update,
+            context,
+            args[0].lower(),
+            show_none=True,
+            no_format=args[1].lower() in ["raw", "noformat"],
+        )
+
     elif len(args) >= 1:
         get(update, context, args[0].lower(), show_none=True)
     else:

@@ -44,40 +44,40 @@ def backup_db(ctx: CallbackContext):
     tmpmsg = "Performing backup, Please wait..."
     tmp = bot.send_message(OWNER_ID, tmpmsg)
     datenow = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    dbbkpname = "db_{}_{}.tar".format(bot.username, datenow)
-    bkplocation = "backups/{}".format(datenow)
-    bkpcmd = "pg_dump {} --format=tar > {}/{}".format(DB_URI, bkplocation, dbbkpname)
+    dbbkpname = f"db_{bot.username}_{datenow}.tar"
+    bkplocation = f"backups/{datenow}"
+    bkpcmd = f"pg_dump {DB_URI} --format=tar > {bkplocation}/{dbbkpname}"
 
     if not os.path.exists(bkplocation):
         os.makedirs(bkplocation)
     log.info("performing db backup")
     loginfo = "db backup"
     term(bkpcmd, loginfo)
-    if not os.path.exists('{}/{}'.format(bkplocation, dbbkpname)):
+    if not os.path.exists(f'{bkplocation}/{dbbkpname}'):
         bot.send_message(OWNER_ID, "An error occurred during the db backup")
         tmp.edit_text("Backup Failed!")
         sleep(8)
         tmp.delete()
-        return 
+        return
     else:
         log.info("copying config, logs, and updates to backup location")
         if os.path.exists('logs.txt'):
             print("logs copied")
-            shutil.copyfile('logs.txt', '{}/logs.txt'.format(bkplocation))
+            shutil.copyfile('logs.txt', f'{bkplocation}/logs.txt')
         if os.path.exists('updates.txt'):
             print("updates copied")
-            shutil.copyfile('updates.txt', '{}/updates.txt'.format(bkplocation))
+            shutil.copyfile('updates.txt', f'{bkplocation}/updates.txt')
         if os.path.exists('config.ini'):
             print("config copied")
-            shutil.copyfile('config.ini', '{}/config.ini'.format(bkplocation))
+            shutil.copyfile('config.ini', f'{bkplocation}/config.ini')
         log.info("zipping the backup")
-        zipcmd = "zip --password '{}' {} {}/*".format(zip_pass, bkplocation, bkplocation)
+        zipcmd = f"zip --password '{zip_pass}' {bkplocation} {bkplocation}/*"
         zipinfo = "zipping db backup"
         log.info("zip intiated")
         term(zipcmd, zipinfo)
         log.info("zip done")
         sleep(1)
-        with open('backups/{}'.format(f'{datenow}.zip'), 'rb') as bkp:
+        with open(f'backups/{datenow}.zip', 'rb') as bkp:
             nm = "{} backup \n".format(bot.username) + datenow
             bot.send_document(OWNER_ID,
                               document=bkp,
@@ -85,7 +85,7 @@ def backup_db(ctx: CallbackContext):
                               timeout=20
                               )
         log.info("removing zipped files")
-        shutil.rmtree("backups/{}".format(datenow))
+        shutil.rmtree(f"backups/{datenow}")
         log.info("backup done")
         tmp.edit_text("Backup complete!")
         sleep(5)
@@ -103,8 +103,7 @@ def term(cmd, info):
     )
     stdout, stderr = process.communicate()
     stderr = stderr.decode()
-    stdout = stdout.decode()
-    if stdout:
+    if stdout := stdout.decode():
         log.info(f"{info} successful!")
         log.info(f"{stdout}")
     if stderr:

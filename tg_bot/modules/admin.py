@@ -400,7 +400,7 @@ async def adminList(event):
         return
 
     temp = await event.reply("Fetching full admins list..")
-    text = "Admins in **{}**".format(event.chat.title)
+    text = f"Admins in **{event.chat.title}**"
 
     admn = telethn.iter_participants(
         event.chat_id, 50, filter=ChannelParticipantsAdmins)
@@ -416,13 +416,13 @@ async def adminList(event):
             if user.first_name == "":
                 name = "☠ Zombie"
             else:
-                name = "[{}](tg://user?id={})".format(user.first_name.split()[0], user.id)
+                name = f"[{user.first_name.split()[0]}](tg://user?id={user.id})"
             creator = "\nㅤㅤ• {}".format(name)
         elif user.bot:
             if user.first_name == "":
                 name = "☠ Zombie"
             else:
-                name = "[{}](tg://user?id={})".format(user.first_name, user.id)  # .split()[0] bots names arent long ig?
+                name = f"[{user.first_name}](tg://user?id={user.id})"
             bots.append("\nㅤㅤ• {}".format(name))
 
         else:
@@ -436,7 +436,7 @@ async def adminList(event):
                 if not user.first_name or user.deleted:
                     continue
                 else:
-                    name = "[{}](tg://user?id={})".format(user.first_name, user.id)
+                    name = f"[{user.first_name}](tg://user?id={user.id})"
             except AttributeError:
                 pass
             admin.append("\nㅤㅤ• {}".format(name))

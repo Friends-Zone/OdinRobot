@@ -42,31 +42,6 @@ def inlinequery(update: Update, _) -> None:
     user = update.effective_user
 
     results: List = []
-    inline_help_dicts = [
-        {
-            "title": " “info” Account info on Ōɖìղ • オーディン",
-            "description": "Look up a Telegram account in Ōɖìղ • オーディン database",
-            "message_text": "Click the button below to look up a person in Ōɖìղ • オーディン database using their Telegram ID",
-            "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
-            "keyboard": "info ",
-        },
-        {
-            "title": " “about” About",
-            "description": "Know about Ōɖìղ • オーディン",
-            "message_text": "Click the button below to get to know about Ōɖìղ • オーディン.",
-            "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
-            "keyboard": "about ",
-        },
-        {
-            "title": " “spb” SpamProtection INFO",
-            "description": "Look up a person/bot/channel/chat on @Intellivoid SpamProtection API",
-            "message_text": "Click the button below to look up a person/bot/channel/chat on @Intellivoid SpamProtection API using "
-                            "username or telegram id",
-            "thumb_urL": "https://telegra.ph/file/3ce9045b1c7faf7123c67.jpg",
-            "keyboard": "spb ",
-        },
-    ]
-
     inline_funcs = {
         "info": inlineinfo,
         "about": about,
@@ -76,6 +51,31 @@ def inlinequery(update: Update, _) -> None:
     if (f := query.split(" ", 1)[0]) in inline_funcs:
         inline_funcs[f](remove_prefix(query, f).strip(), update, user)
     else:
+        inline_help_dicts = [
+            {
+                "title": " “info” Account info on Ōɖìղ • オーディン",
+                "description": "Look up a Telegram account in Ōɖìղ • オーディン database",
+                "message_text": "Click the button below to look up a person in Ōɖìղ • オーディン database using their Telegram ID",
+                "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
+                "keyboard": "info ",
+            },
+            {
+                "title": " “about” About",
+                "description": "Know about Ōɖìղ • オーディン",
+                "message_text": "Click the button below to get to know about Ōɖìղ • オーディン.",
+                "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
+                "keyboard": "about ",
+            },
+            {
+                "title": " “spb” SpamProtection INFO",
+                "description": "Look up a person/bot/channel/chat on @Intellivoid SpamProtection API",
+                "message_text": "Click the button below to look up a person/bot/channel/chat on @Intellivoid SpamProtection API using "
+                                "username or telegram id",
+                "thumb_urL": "https://telegra.ph/file/3ce9045b1c7faf7123c67.jpg",
+                "keyboard": "spb ",
+            },
+        ]
+
         for ihelp in inline_help_dicts:
             results.append(
                 article(
@@ -227,48 +227,47 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
     Built with ❤️ using python-telegram-bot v{str(__version__)}
     Running on Python {python_version()}
     """
-    results: list = []
     kb = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    text="Support",
-                    url=f"https://t.me/TheBotsSupport",
+                    text="Support", url="https://t.me/TheBotsSupport"
                 ),
                 InlineKeyboardButton(
-                    text="Channel",
-                    url=f"https://t.me/LukeBots",
+                    text="Channel", url="https://t.me/LukeBots"
                 ),
                 InlineKeyboardButton(
-                    text="Maintainer",
-                    url=f"https://t.me/itsLuuke",
+                    text="Maintainer", url="https://t.me/itsLuuke"
                 ),
-
             ],
             [
                 InlineKeyboardButton(
                     text="GitLab",
-                    url=f"https://www.gitlab.com/OdinRobot/OdinRobot",
+                    url="https://www.gitlab.com/OdinRobot/OdinRobot",
                 ),
                 InlineKeyboardButton(
                     text="GitHub",
                     url="https://www.github.com/OdinRobot/OdinRobot",
                 ),
             ],
-        ])
+        ]
+    )
 
-    results.append(
 
-        InlineQueryResultArticle
-            (
+    results: list = [
+        InlineQueryResultArticle(
             id=str(uuid4()),
             title=f"About Ōɖìղ • オーディン (@{context.bot.username})",
-            input_message_content=InputTextMessageContent(about_text, parse_mode=ParseMode.MARKDOWN,
-                                                          disable_web_page_preview=True),
+            input_message_content=InputTextMessageContent(
+                about_text,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True,
+            ),
             thumb_url="https://telegra.ph/file/c741074ba2291655a8546.jpg",
-            reply_markup=kb
+            reply_markup=kb,
         )
-    )
+    ]
+
     update.inline_query.answer(results)
 
 
@@ -329,16 +328,16 @@ def spb(query: str, update: Update, context: CallbackContext) -> None:
         [
             [
                 InlineKeyboardButton(
-                    text="Report Error",
-                    url=f"https://t.me/TheBotsSupport",
+                    text="Report Error", url="https://t.me/TheBotsSupport"
                 ),
                 InlineKeyboardButton(
                     text="Search again",
                     switch_inline_query_current_chat="spb ",
                 ),
+            ]
+        ]
+    )
 
-            ],
-        ])
 
     a = "the entity was not found"
     results = [

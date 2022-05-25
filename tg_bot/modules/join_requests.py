@@ -23,24 +23,23 @@ def chat_join_req(upd: Update, ctx: CallbackContext):
     user = upd.chat_join_request.from_user
     chat = upd.chat_join_request.chat
     keyboard = InlineKeyboardMarkup(
+        [
             [
-                [
-                    InlineKeyboardButton(
-                            "✅ Approve", callback_data="cb_approve={}".format(user.id)
-                    ),
-                    InlineKeyboardButton(
-                            "❌ Decline", callback_data="cb_decline={}".format(user.id)
-                    ),
-                ]
+                InlineKeyboardButton(
+                    "✅ Approve", callback_data=f"cb_approve={user.id}"
+                ),
+                InlineKeyboardButton(
+                    "❌ Decline", callback_data=f"cb_decline={user.id}"
+                ),
             ]
+        ]
     )
+
     bot.send_message(
-            chat.id,
-            "{} wants to join {}".format(
-                    mention_html(user.id, user.first_name), chat.title or "this chat"
-            ),
-            reply_markup=keyboard,
-            parse_mode=ParseMode.HTML,
+        chat.id,
+        f'{mention_html(user.id, user.first_name)} wants to join {chat.title or "this chat"}',
+        reply_markup=keyboard,
+        parse_mode=ParseMode.HTML,
     )
 
 

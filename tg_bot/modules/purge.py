@@ -38,11 +38,10 @@ async def purge_messages(event):
         await event.reply(
             "Reply to a message to select where to start purging from.")
         return
-    messages = []
     message_id = reply_msg.id
     delete_to = event.message.id
 
-    messages.append(event.reply_to_msg_id)
+    messages = [event.reply_to_msg_id]
     for msg_id in range(message_id, delete_to + 1):
         messages.append(msg_id)
         if len(messages) == 100:
@@ -57,9 +56,7 @@ async def purge_messages(event):
     text = f"Purged Successfully in {time_:0.2f} Second(s)"
     prmsg = await event.respond(text, parse_mode='markdown')
 
-    cleartime = get_clearcmd(event.chat_id, "purge")
-
-    if cleartime:
+    if cleartime := get_clearcmd(event.chat_id, "purge"):
         await sleep(cleartime.time)
         await prmsg.delete()
 
@@ -87,10 +84,6 @@ async def delete_messages(event):
         return
 
     message = await event.get_reply_message()
-    # elif event.chat.admin_rights:
-    #     status = event.chat.admin_rights.delete_messages
-    #     return status
-                # if user_id == user.id:# and user_id.ChatAdminRights(delete_messages=True):
     if not message:
         await event.reply("Whadya want to delete?")
         return
@@ -99,7 +92,9 @@ async def delete_messages(event):
     # # print(event.sender_id.ChatAdminRights)
     # print(event.chat.admin_rights)
     # print(event.stringify())
-    if not await can_delete_messages(message=event) and not int(message.sender.id) == int(BOT_ID):
+    if not await can_delete_messages(message=event) and int(
+        message.sender.id
+    ) != int(BOT_ID):
         if event.chat.admin_rights is None:
             await event.reply("I'm not an admin, do you mind promoting me first?")
         elif not event.chat.admin_rights.delete_messages:
@@ -111,8 +106,7 @@ async def delete_messages(event):
     try:
         await event.client.delete_messages(chat, event.message)
     except MessageDeleteForbiddenError:
-        print("error in deleting message {} in {}".format(event.message.id, event.chat.id))
-        pass
+        print(f"error in deleting message {event.message.id} in {event.chat.id}")
 
 
 from .language import gs
